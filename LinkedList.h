@@ -30,28 +30,22 @@ public:
 
     // LinkedList destructor to delete all the nodes in the list.
     ~LinkedList() {
-        while (head){
-            Node* tmp = head;
-            head = head->next;
-            delete tmp;
-        }
-        head = nullptr;
-        tail = nullptr;
+        Clear();
     }
 
     // Add a node with data at the beginning of the list
     void AddHead(T data) {
-            Node *newNode = new Node(data); // create a new node
-            if (head == nullptr) { // If the list is empty
-                head = newNode; // The new Node is now the head
-                tail = newNode; // It is also the tail node
-            } else {
-                newNode->next = head; // the new Node points to the new head
-                head->prev = newNode;
-                head = newNode; // the new Node becomes the new head
-            }
-            count++; // Increase the Node count
+        Node *newNode = new Node(data); // create a new node
+        if (head == nullptr) { // If the list is empty
+            head = newNode; // The new Node is now the head
+            tail = newNode; // It is also the tail node
+        } else {
+            newNode->next = head; // the new Node points to the new head
+            head->prev = newNode;
+            head = newNode; // the new Node becomes the new head
         }
+        count++; // Increase the Node count
+    }
 
     // Add a node with data at the end of the list
     void AddTail(T data) {
@@ -235,7 +229,8 @@ public:
         count++; // Increase count
     }
 
-    void InsertAfter(Node* node, T data) { // Inserts node after given node
+    // Inserts node after given node
+    void InsertAfter(Node* node, T data) {
         if (node == nullptr) { // Check if node is null
             throw std::invalid_argument("Invalid node");
         }
@@ -251,7 +246,8 @@ public:
         count++; // Increase count
     }
 
-    void InsertAt(T data, int index) { // Inserts node at given index
+    // Inserts node at given index
+    void InsertAt(T data, int index) {
         if (index < 0 || index > count) { // Check if index is in range
             throw std::out_of_range("Index out of range");
         }
@@ -265,7 +261,8 @@ public:
         }
     }
 
-    bool operator==(const LinkedList<T>& other) const { // Compares two linked lists
+    // Compares two linked lists
+    bool operator==(const LinkedList<T>& other) const {
         if (count != other.count) { // Checks if counts are equal
             return false;
         }
@@ -281,6 +278,127 @@ public:
         return true; // Lists are equal
     }
 
+    // Function to remove the head node
+    bool RemoveHead() {
+        if (head) {
+            Node* toDelete = head;
+            if(head->next) {
+                head = head->next;
+                head->prev = nullptr;
+            } else {
+                head = tail = nullptr;
+            }
+            delete toDelete;
+            count--;
+            return true;
+        }
+        return false;
+    }
+
+    // Function to remove the tail node
+    bool RemoveTail() {
+        if (tail) {
+            Node* toDelete = tail;
+            if(tail->prev) {
+                tail = tail->prev;
+                tail->next = nullptr;
+            } else {
+                head = tail = nullptr;
+            }
+            delete toDelete;
+            count--;
+            return true;
+        }
+        return false;
+    }
+
+    // Function to remove a node at a specific index
+    bool RemoveAt(int index) {
+        if (index < 0 || index >= count) {
+            return false;
+        }
+        if(index == 0) {
+            return RemoveHead();
+        }
+        if(index == count - 1) {
+            return RemoveTail();
+        }
+        Node* toDelete = GetNode(index);
+        toDelete->prev->next = toDelete->next;
+        toDelete->next->prev = toDelete->prev;
+        delete toDelete;
+        count--;
+        return true;
+    }
+
+    // Function to remove a node with specific data
+    int Remove(T data) {
+        int removedCount = 0;
+        Node* current = head;
+        while (current) {
+            if (current->data == data) {
+                Node* toDelete = current;
+
+                if (toDelete == head) {
+                    head = head->next;
+                    if (head) head->prev = nullptr;
+                    else tail = nullptr;
+                } else if (toDelete == tail) {
+                    tail = tail->prev;
+                    if (tail) tail->next = nullptr;
+                    else head = nullptr;
+                } else {
+                    toDelete->prev->next = toDelete->next;
+                    toDelete->next->prev = toDelete->prev;
+                }
+                current = current->next;
+                delete toDelete;
+                count--;
+                removedCount++;
+            } else {
+                current = current->next;
+            }
+        }
+        return removedCount;
+    }
+
+    // Function to remove all nodes
+    void Clear() {
+        while (head) { // While there is a head node
+            Node* tmp = head; // Temp pointer to the head node
+            head = head->next; // Move head to next node
+            delete tmp; // Delete the old head node
+        }
+        head = nullptr; // Clear head
+        tail = nullptr; // Clear tail
+        count = 0; // Reset the count of nodes
+    }
+
+    // Helper function to print nodes forward recursively
+    void PrintForwardRecursiveHelper(Node* node) {
+        if(node == nullptr) return; // If the node is null, return
+        cout << node->data << endl; // Print the data of the node
+        PrintForwardRecursiveHelper(node->next); // Call the function recursively for the next node
+    }
+
+    // Function to print nodes forward recursively from a certain node
+    void PrintForwardRecursive(Node* node = nullptr) {
+        if(node == nullptr) node = head; // If no node is provided, start from the head
+        PrintForwardRecursiveHelper(node); // Call the helper function starting from the provided node or the head
+    }
+
+    // Helper function to print nodes reverse recursively
+    void PrintReverseRecursiveHelper(Node* node) {
+        if (node == nullptr) return; // If the node is null, return
+        cout << node->data << endl; // Print the data of the node
+        PrintReverseRecursiveHelper(node->prev); // Call the function recursively for the previous node
+    }
+
+    // Function to print nodes reverse recursively from a certain node
+    void PrintReverseRecursive(Node* node = nullptr) {
+        if (node == nullptr) node = tail; // If no node is provided, start from the tail
+        PrintReverseRecursiveHelper(node); // Call the helper function starting from the provided node or the tail
+    }
 
 private:
     Node* head; // The first node in the list
