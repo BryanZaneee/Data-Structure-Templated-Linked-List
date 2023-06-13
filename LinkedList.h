@@ -218,6 +218,70 @@ public:
         return *this;
     }
 
+    // Insert a node with data before a given node
+    void InsertBefore(Node* node, T data) { // Inserts node before given node
+        if (node == nullptr) { // Check if node is null
+            throw std::invalid_argument("Invalid node");
+        }
+        Node* newNode = new Node(data); // Create new node
+        newNode->prev = node->prev; // Set prev pointer of new node
+        newNode->next = node; // Set next pointer of new node
+        if (node->prev) { // Check if given node has a prev node
+            node->prev->next = newNode;
+        } else { // If given node is head, set head to new node
+            head = newNode;
+        }
+        node->prev = newNode; // Set prev of given node to new node
+        count++; // Increase count
+    }
+
+    void InsertAfter(Node* node, T data) { // Inserts node after given node
+        if (node == nullptr) { // Check if node is null
+            throw std::invalid_argument("Invalid node");
+        }
+        Node* newNode = new Node(data); // Create new node
+        newNode->prev = node; // Set prev pointer of new node
+        newNode->next = node->next; // Set next pointer of new node
+        if (node->next) { // Check if given node has a next node
+            node->next->prev = newNode;
+        } else { // If given node is tail, set tail to new node
+            tail = newNode;
+        }
+        node->next = newNode; // Set next of given node to new node
+        count++; // Increase count
+    }
+
+    void InsertAt(T data, int index) { // Inserts node at given index
+        if (index < 0 || index > count) { // Check if index is in range
+            throw std::out_of_range("Index out of range");
+        }
+        if (index == 0) { // If index is 0, add to head
+            AddHead(data);
+        } else if (index == count) { // If index is count, add to tail
+            AddTail(data);
+        } else { // Otherwise, insert before node at index
+            Node* current = GetNode(index);
+            InsertBefore(current, data);
+        }
+    }
+
+    bool operator==(const LinkedList<T>& other) const { // Compares two linked lists
+        if (count != other.count) { // Checks if counts are equal
+            return false;
+        }
+        Node* current1 = head;
+        Node* current2 = other.head;
+        while (current1 && current2) {
+            if (current1->data != current2->data) { // Compares data of nodes
+                return false;
+            }
+            current1 = current1->next; // Move to next node in this list
+            current2 = current2->next; // Move to next node in other list
+        }
+        return true; // Lists are equal
+    }
+
+
 private:
     Node* head; // The first node in the list
     Node* tail; // The last Node in the list
